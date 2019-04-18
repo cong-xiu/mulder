@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/cong-xiu/jenkins-x-kubernetes:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/cong-xiu/jenkins-x-kubernetes:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: jenkins-x-kubernetes
+        chartPath: charts/jenkins-x-kubernetes
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/cong-xiu/jenkins-x-kubernetes'
+          image.tag: '{{.DIGEST_HEX}}'
